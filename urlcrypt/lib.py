@@ -16,8 +16,6 @@ except ImportError:
     SECRET_KEY = 'sekrit'
     OBFUSCATE_KEY = 'supersekrit'
 
-HMAC_KEY = "django-urlcrypt." + SECRET_KEY
-
 def obfuscate(text):
     # copy out our OBFUSCATE_KEY to the length of the text
     key = OBFUSCATE_KEY * (len(text)//len(OBFUSCATE_KEY) + 1)
@@ -59,7 +57,7 @@ def decode_login_token(token):
 
 def encode_token(*strings):
     token = ''.join(itertools.chain(strings, (SECRET_KEY,)))
-    token_hash = hmac.new(HMAC_KEY, token, sha_hmac).hexdigest()
+    token_hash = hmac.new(SECRET_KEY, token, sha_hmac).hexdigest()
     packed_string = pack(token_hash, *strings)
     obfuscated_string = obfuscate(packed_string)
     return base64url_encode(obfuscated_string)
