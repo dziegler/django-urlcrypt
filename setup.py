@@ -11,7 +11,7 @@ README = read('README.rst')
 setup(
     name = "django-urlcrypt",
     version = urlcrypt.__version__,
-    description = '',
+    description = 'Encrypts information in urls, such as login credentials. Useful if you want to send a user a link that logs the user in without leaking their login credentials.',
     long_description = README,
     url = 'http://github.com/dziegler/django-urlcrypt',
     author = 'David Ziegler',
