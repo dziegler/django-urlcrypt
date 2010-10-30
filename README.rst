@@ -65,14 +65,20 @@ Advanced lib usage::
 Settings
 ********
 
-``URLCRYPT_LOGIN_URL``  default: LOGIN_URL
+ - ``URLCRYPT_LOGIN_URL``
+ 
+   - default: ``LOGIN_URL``
+   - If urlcrypt authentication fails, redirects to ``URLCRYPT_LOGIN_URL``.
 
-If urlcrypt authentication fails, redirects to ``URLCRYPT_LOGIN_URL``.
+ - ``URLCRYPT_RATE_LIMIT``
+  
+   - default: ``60``
+   - The number of urlcrypt requests a unique visitor is allowed to make per minute.
 
-
-``RUNNING_TESTS``  default: False
-
-Set ``RUNNING_TESTS`` to True when running the urlcrypt tests.
+ - ``RUNNING_TESTS``  
+ 
+   - default: ``False``
+   - Set ``RUNNING_TESTS`` to True when running the urlcrypt tests.
 
 Credits
 ********
