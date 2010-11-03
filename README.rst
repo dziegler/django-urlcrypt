@@ -25,11 +25,11 @@ Installation
 
 3. In settings.py add ``'urlcrypt.auth_backends.UrlCryptBackend'`` to ``AUTHENTICATION_BACKENDS``
 
-3. In urls.py add::
+4. In urls.py add::
 
     (r'^r/', include('urlcrypt.urls')),
     
-4. If you wish to use RSA encryption on your tokens, set ``URLCRYPT_USE_RSA_ENCRYPTION = True`` in your settings, generate a private key with ``ssh-keygen -t rsa -f <path to private key>`` and then set the path to the private key as URLCRYPT_PRIVATE_KEY_PATH.  RSA encryption makes the token much longer but is more secure.  The ``pycrypto`` library is required.
+5. If you wish to use RSA encryption on your tokens, set ``URLCRYPT_USE_RSA_ENCRYPTION = True`` in your settings, generate a private key with ``ssh-keygen -t rsa -f <path to private key>`` and then set the path to the private key as URLCRYPT_PRIVATE_KEY_PATH.  RSA encryption makes the token much longer but is more secure.  The ``pycrypto`` library is required.
 
 Usage
 ******
