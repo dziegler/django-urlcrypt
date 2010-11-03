@@ -23,6 +23,8 @@ Installation
     
 2. Add ``urlcrypt`` to your ``INSTALLED_APPS``
 
+3. In settings.py add ``'urlcrypt.auth_backends.UrlCryptBackend'`` to ``AUTHENTICATION_BACKENDS``
+
 3. In urls.py add::
 
     (r'^r/', include('urlcrypt.urls')),

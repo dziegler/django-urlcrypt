@@ -3,9 +3,8 @@ from django.contrib.auth.models import User
 class UrlCryptBackend:
     
     def authenticate(self, decoded_data=None):
-        
         try:
-            return User.objects.get(id=decoded_data['user_id'], password=decoded_data['password'])
+            return User.objects.get(id=decoded_data['user_id'])
         except User.DoesNotExist:
             return None
 
