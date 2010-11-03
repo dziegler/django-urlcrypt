@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from django.test import TestCase
-from urlcrypt.lib import generate_login_token, decode_login_token, encode_token
+from urlcrypt.lib import generate_login_token, decode_login_token, encode_token, secret_key_f
 from urlcrypt.conf import URLCRYPT_LOGIN_URL
 from urlcrypt import rsa
 
@@ -28,7 +28,7 @@ class UrlCryptTests(TestCase):
         response = self.client.get(reverse('urlcrypt_redirect', args=(fake_token,)))
         self.assertRedirects(response, URLCRYPT_LOGIN_URL)
         
-        fake_token = encode_token(str(self.test_user.id), str('asdf;ljasdf'), reverse('urlcrypt_test_view'))
+        fake_token = encode_token([str(self.test_user.id), reverse('urlcrypt_test_view'), str(int(time.time()))], secret_key_f)
         response = self.client.get(reverse('urlcrypt_redirect', args=(fake_token,)))
         self.assertRedirects(response, URLCRYPT_LOGIN_URL)
             
