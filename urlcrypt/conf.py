@@ -14,7 +14,10 @@ URLCRYPT_USE_RSA_ENCRYPTION = getattr(settings, 'URLCRYPT_USE_RSA_ENCRYPTION', F
 if RUNNING_TESTS:
     URLCRYPT_PRIVATE_KEY_PATH = os.path.join(SCRIPT_DIR, "test", "test_private_key")
 else:
-    URLCRYPT_PRIVATE_KEY_PATH = getattr(settings, 'URLCRYPT_PRIVATE_KEY_PATH', '/path/to/private_key')
+    URLCRYPT_PRIVATE_KEY_PATH = getattr(settings, 'URLCRYPT_PRIVATE_KEY_PATH', None)
+
+if URLCRYPT_USE_RSA_ENCRYPTION and URLCRYPT_PRIVATE_KEY_PATH is None:
+    raise Exception("When using URLCRYPT_USE_RSA_ENCRYPTION you must set URLCRYPT_PRIVATE_KEY_PATH to the path of your private key")
 
 URLCRYPT_LOGIN_URL = getattr(settings, 'URLCRYPT_LOGIN_URL', settings.LOGIN_URL)
 URLCRYPT_RATE_LIMIT = getattr(settings, 'URLCRYPT_RATE_LIMIT', 60)
