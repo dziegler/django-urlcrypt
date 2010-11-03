@@ -6,6 +6,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 SECRET_KEY = getattr(settings, 'SECRET_KEY', 'sekrit')
 RUNNING_TESTS = getattr(settings, 'RUNNING_TESTS', False)
+RUNNING_TESTS = True
 
 # Changing this setting, or SECRET_KEY, invalidates existing tokens, the pycrypto library is required if enabled
 URLCRYPT_USE_RSA_ENCRYPTION = getattr(settings, 'URLCRYPT_USE_RSA_ENCRYPTION', False)
