@@ -64,7 +64,7 @@ Advanced lib usage::
     TkNJBkNFAghDWkdFGPUAQEfcDUJfEBIREgEUFl1BQ18IQkdDUUcPSh4ADAYAWhYKHh8KHBsHEw
     
     >>> print decoded_message
-    {'url': '/users/following', 'user_id': '12345'}
+    {'url': '/users/following/', 'user_id': '12345'}
     
 Settings
 ********
