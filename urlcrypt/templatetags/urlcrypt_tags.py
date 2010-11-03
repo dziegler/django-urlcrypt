@@ -1,10 +1,10 @@
 from django import template
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.template.defaulttags import URLNode
 
-from urlcrypt import lib as urlcrypt
+from urlcrypt.conf import RUNNING_TESTS
+from urlcrypt.lib import generate_login_token
 
 register = template.Library()
 
@@ -17,7 +17,7 @@ class EncodedURLNode(URLNode):
     def render(self, context):
         url = super(EncodedURLNode, self).render(context)
         user = self.user.resolve(context)
-        token = urlcrypt.generate_login_token(user, url)
+        token = generate_login_token(user, url)
         return reverse('urlcrypt_redirect', args=(token,))
 
 @register.tag
@@ -50,10 +50,10 @@ def encoded_url(parser, token):
 
 @register.simple_tag
 def encode_url_string(user, url):
-    if settings.RUNNING_TESTS:
+    if RUNNING_TESTS:
         domain = 'testserver'
     else:
         domain = Site.objects.get_current().domain
     protocol, suffix = url.split("://%s" % domain)
-    token = urlcrypt.generate_login_token(user, suffix)
+    token = generate_login_token(user, suffix)
     return "%s://%s" % (protocol, reverse('urlcrypt_redirect', args=(token,)))

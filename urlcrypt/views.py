@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 
-from urlcrypt import lib as urlcrypt
 from urlcrypt.conf import URLCRYPT_LOGIN_URL, URLCRYPT_RATE_LIMIT
+from urlcrypt.lib import decode_login_token
+
+# import encode_token and decode_token from correct backend
 
 def rate_limit(num=60):
     """
@@ -27,7 +29,7 @@ def rate_limit(num=60):
 @rate_limit(num=URLCRYPT_RATE_LIMIT)
 def login_redirect(request, token):
     try:
-        decoded_data = urlcrypt.decode_login_token(token)
+        decoded_data = decode_login_token(token)
     except Exception, ex:
         return HttpResponseRedirect(URLCRYPT_LOGIN_URL)
 

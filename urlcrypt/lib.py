@@ -1,8 +1,6 @@
-# A library for safely encoding and obfuscating data in urls
-
 import base64
+import hashlib
 import hmac
-import itertools
 import time
 
 try:
@@ -10,22 +8,16 @@ try:
 except ImportError:
     import sha as sha_hmac
 
-try:
-    from urlcrypt.conf import OBFUSCATE_KEY, SECRET_KEY
-except ImportError:
-    SECRET_KEY = 'sekrit'
-    OBFUSCATE_KEY = 'supersekrit'
+from django.contrib.auth.models import User
 
-def obfuscate(text):
-    # copy out our OBFUSCATE_KEY to the length of the text
-    key = OBFUSCATE_KEY * (len(text)//len(OBFUSCATE_KEY) + 1)
-    
-    # XOR each character from our input with the corresponding character
-    # from the key
-    xor_gen = (chr(ord(t) ^ ord(k)) for t, k in zip(text, key))
-    return ''.join(xor_gen)
+from urlcrypt.conf import SECRET_KEY, URLCRYPT_USE_RSA_ENCRYPTION
 
-deobfuscate = obfuscate
+if URLCRYPT_USE_RSA_ENCRYPTION:
+    import urlcrypt.rsa
+
+# generate a key for obfuscation
+# kind of ghetto, is there a better way to do this other than os.urandom?
+OBFUSCATE_KEY = hashlib.sha512(SECRET_KEY).digest() + hashlib.sha512(SECRET_KEY[::-1]).digest()
 
 def base64url_encode(text):
     padded_b64 = base64.urlsafe_b64encode(text)
@@ -47,40 +39,51 @@ def pack(*strings):
 def unpack(packed_string):
     return packed_string.split('|')
 
-def generate_login_token(user, url):
-    return encode_token(*map(str, (user.id, user.password, url.strip(), int(time.time()))))
+def obfuscate(text):
+    # copy out our OBFUSCATE_KEY to the length of the text
+    key = OBFUSCATE_KEY * (len(text)//len(OBFUSCATE_KEY) + 1)
 
-def decode_login_token(token):
-    data = decode_token(str(token), ('user_id', 'password', 'url', 'timestamp'))
-    data['user_id'] = int(data['user_id'])
-    return data
+    # XOR each character from our input with the corresponding character
+    # from the key
+    xor_gen = (chr(ord(t) ^ ord(k)) for t, k in zip(text, key))
+    return ''.join(xor_gen)
 
-def encode_token(*strings):
-    token = ''.join(itertools.chain(strings, (SECRET_KEY,)))
-    token_hash = hmac.new(SECRET_KEY, token, sha_hmac).hexdigest()
-    packed_string = pack(token_hash, *strings)
-    obfuscated_string = obfuscate(packed_string)
-    return base64url_encode(obfuscated_string)
-    
-def decode_token(token, keys):
-    # if you add more fields, you need to use .get() so that old tokens
-    # don't cause a KeyError
-    obfuscated_string = base64url_decode(token)
-    packed_string = deobfuscate(obfuscated_string)
+deobfuscate = obfuscate
+
+def encode_token(strings, secret_key_f):
+    secret_key = secret_key_f(*strings)
+    signature = hmac.new(secret_key, pack(*strings), sha_hmac).hexdigest()
+    packed_string = pack(signature, *strings)
+    return obfuscate(packed_string)
+
+def decode_token(token, keys, secret_key_f):
+    packed_string = deobfuscate(token)
     strings = unpack(packed_string)[1:]
-    assert token == encode_token(*strings)
+    assert token == encode_token(strings, secret_key_f)
     return dict(zip(keys, strings))
 
-if __name__ == '__main__':
-    message = {
-        'url': u'/users/following', 
-        'user_id': '12345'
-    }
+def secret_key_f(user_id, *args):
+    # generate a secret key given the user id
+    user = User.objects.get(id=int(user_id))
+    return user.password + SECRET_KEY
+
+def generate_login_token(user, url):
+    strings = [str(user.id), url.strip(), str(int(time.time()))]
+    token_byte_string = encode_token(strings, secret_key_f)
     
-    token = encode_token(message['user_id'], message['url'])
-    decoded_message = decode_token(token,('user_id', 'url', 'timestamp'))
-    print 'token: {0}'.format(token)
-    print 'token length: {0}'.format(len(token))
-    print 'decoded: {0}'.format(decoded_message)
-    for key, val in message.iteritems():
-        assert val == decoded_message[key]
+    if URLCRYPT_USE_RSA_ENCRYPTION:
+        token_byte_string = urlcrypt.rsa.encrypt(token_byte_string)
+    
+    return base64url_encode(token_byte_string)
+
+def decode_login_token(token):
+    token_byte_string = base64url_decode(str(token))
+    
+    if URLCRYPT_USE_RSA_ENCRYPTION:
+        token_byte_string = urlcrypt.rsa.decrypt(token_byte_string)
+        
+    keys = ('user_id', 'url', 'timestamp')
+    data = decode_token(token_byte_string, keys, secret_key_f)
+    data['user_id'] = int(data['user_id'])
+    data['timestamp'] = int(data['timestamp'])
+    return data

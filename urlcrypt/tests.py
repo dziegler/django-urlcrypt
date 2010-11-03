@@ -2,9 +2,10 @@ from django import template
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from test_utils.testcase import TestCase
-from urlcrypt import lib as urlcrypt
+from django.test import TestCase
+from urlcrypt.lib import generate_login_token, decode_login_token
 from urlcrypt.conf import URLCRYPT_LOGIN_URL
+from urlcrypt import rsa
 
 class UrlCryptTests(TestCase):
     
@@ -12,22 +13,15 @@ class UrlCryptTests(TestCase):
         super(UrlCryptTests, self).setUp()
         self.test_user = User.objects.create_user('test', 'test@malinator.com', 'test')
     
-    def test_token_encoding(self):
-        message = {
-            'url': '/users/following', 
-            'user_id': '12345'
-        }
-
-        token = urlcrypt.encode_token(message['user_id'], message['url'])
-        decoded_message = urlcrypt.decode_token(token,('user_id', 'url', 'timestamp'))
-        for key, val in message.iteritems():
-            assert val == decoded_message[key]
-    
     def test_login_token(self):
-        token = urlcrypt.generate_login_token(self.test_user, u'/users/following')
-        data = urlcrypt.decode_login_token(token)
+        token = generate_login_token(self.test_user, u'/users/following')
+        data = decode_login_token(token)
         self.assertEquals(data['user_id'], self.test_user.id)
         self.assertEquals(data['url'], u'/users/following')
+    
+    def test_rsa(self):
+        assert rsa.decrypt(rsa.encrypt("test")) == "test"
+        assert rsa.decrypt(rsa.encrypt("test"*100)) == "test"*100
     
     def test_login_token_failed_hax0r(self):
         fake_token = 'asdf;lhasdfdso'
