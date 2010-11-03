@@ -86,8 +86,8 @@ Settings
 
  - ``URLCRYPT_PRIVATE_KEY_PATH``
  
-   - default: ``/path/to/private_key``
-   - The path to the RSA private key file in PEM format, only used if URLCRYPT_USE_RSA_ENCRYPTION is True.
+   - default: ``None``
+   - The path to the RSA private key file in PEM format, used if and only if URLCRYPT_USE_RSA_ENCRYPTION is True.
 
  - ``RUNNING_TESTS``
  
