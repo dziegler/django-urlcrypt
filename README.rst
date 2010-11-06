@@ -29,7 +29,7 @@ Installation
 
     (r'^r/', include('urlcrypt.urls')),
     
-5. If you wish to use RSA encryption on your tokens, set ``URLCRYPT_USE_RSA_ENCRYPTION = True`` in your settings, generate a private key with ``ssh-keygen -t rsa -f <path to private key>`` and then set the path to the private key as URLCRYPT_PRIVATE_KEY_PATH.  RSA encryption makes the token much longer but is more secure.  The ``pycrypto`` library is required.
+5. **(recommended)** If you wish to use RSA encryption on your tokens, generate a private key with ``ssh-keygen -t rsa -f <path to private key>`` if you don't already have one, and then set the path to the private key as URLCRYPT_PRIVATE_KEY_PATH. RSA encryption makes the token much longer but is more secure.  The ``pycrypto`` library is required.
 
 Usage
 ******
@@ -79,15 +79,10 @@ Settings
    - default: ``60``
    - The number of urlcrypt requests a unique visitor is allowed to make per minute.
 
- - ``URLCRYPT_USE_RSA_ENCRYPTION``
- 
-   - default: ``False``
-   - Set ``URLCRYPT_USE_RSA_ENCRYPTION`` to True to enable RSA encryption of tokens.
-
  - ``URLCRYPT_PRIVATE_KEY_PATH``
  
    - default: ``None``
-   - The path to the RSA private key file in PEM format, used if and only if URLCRYPT_USE_RSA_ENCRYPTION is True.
+   - The path to the RSA private key file in PEM format. If ``None``, RSA encryption will not be used.
 
  - ``RUNNING_TESTS``
  
