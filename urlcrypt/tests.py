@@ -6,8 +6,7 @@ from django.core.urlresolvers import reverse
 
 from django.test import TestCase
 from urlcrypt.lib import generate_login_token, decode_login_token, encode_token, secret_key_f, base64url_encode
-from urlcrypt.conf import URLCRYPT_LOGIN_URL
-from urlcrypt import rsa
+from urlcrypt.conf import URLCRYPT_LOGIN_URL, URLCRYPT_USE_RSA_ENCRYPTION
 
 class UrlCryptTests(TestCase):
     
@@ -22,8 +21,10 @@ class UrlCryptTests(TestCase):
         self.assertEquals(data['url'], u'/users/following')
     
     def test_rsa(self):
-        assert rsa.decrypt(rsa.encrypt("test")) == "test"
-        assert rsa.decrypt(rsa.encrypt("test"*100)) == "test"*100
+        if URLCRYPT_USE_RSA_ENCRYPTION:
+            from urlcrypt import rsa
+            assert rsa.decrypt(rsa.encrypt("test")) == "test"
+            assert rsa.decrypt(rsa.encrypt("test"*100)) == "test"*100
     
     def test_login_token_failed_hax0r(self):
         fake_token = 'asdf;lhasdfdso'
