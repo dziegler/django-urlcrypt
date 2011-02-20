@@ -1,3 +1,4 @@
+import re
 import time
 
 from django import template
@@ -20,6 +21,12 @@ class UrlCryptTests(TestCase):
         data = decode_login_token(token)
         self.assertEquals(data['user_id'], self.test_user.id)
         self.assertEquals(data['url'], u'/users/following')
+
+    def test_blank_unicode_password(self):
+        self.test_user.password = u""
+        self.test_user.save()
+        self.assertEqual(type(self.test_user.password), type(u""))
+        self.test_login_token()
     
     def test_rsa(self):
         assert rsa.decrypt(rsa.encrypt("test")) == "test"
@@ -63,6 +70,18 @@ class UrlCryptTests(TestCase):
         c = template.Context({'test_user': self.test_user})
         encoded_url = t.render(c).strip()
         self.assert_login_url(encoded_url, reverse('urlcrypt_test_view_username', args=(self.test_user.username,)))
+
+    def test_url_encoded_template_tag_with_as_var(self):
+        text = """
+        {% load urlcrypt_tags %}
+        {% encoded_url test_user urlcrypt_test_view_username test_user.username as myurl %}
+        URL:{{ myurl }}:URL
+        """
+        t = template.Template(text)
+        c = template.Context({'test_user': self.test_user})
+        match = re.match("URL:(.+):URL", t.render(c).strip())
+        self.assertTrue(bool(match))
+        self.assert_login_url(match.group(1), reverse('urlcrypt_test_view_username', args=(self.test_user.username,)))
     
     def test_encode_url_string_template_tag(self):
         text = """
