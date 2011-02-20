@@ -52,7 +52,7 @@ deobfuscate = obfuscate
 
 def encode_token(strings, secret_key_f):
     secret_key = secret_key_f(*strings)
-    signature = hmac.new(secret_key, pack(*strings), sha_hmac).hexdigest()
+    signature = hmac.new(str(secret_key), pack(*strings), sha_hmac).hexdigest()
     packed_string = pack(signature, *strings)
     return obfuscate(packed_string)
 
