@@ -7,7 +7,6 @@ def read(fname):
 
 README = read('README.rst')
 
-
 setup(
     name = "django-urlcrypt",
     version = urlcrypt.__version__,
@@ -20,6 +19,7 @@ setup(
     zip_safe = False,
     packages = find_packages(),
     include_package_data = True,
+    package_data = {'urlcrypt': ['test/test_private_key']},
     classifiers = [
         'Environment :: Web Environment',
         'Framework :: Django',
