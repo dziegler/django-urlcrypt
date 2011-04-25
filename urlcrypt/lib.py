@@ -50,16 +50,16 @@ def obfuscate(text):
 
 deobfuscate = obfuscate
 
-def encode_token(strings, secret_key_f):
+def encode_token(strings):
     secret_key = secret_key_f(*strings)
     signature = hmac.new(str(secret_key), pack(*strings), sha_hmac).hexdigest()
     packed_string = pack(signature, *strings)
     return obfuscate(packed_string)
 
-def decode_token(token, keys, secret_key_f):
+def decode_token(token, keys):
     packed_string = deobfuscate(token)
     strings = unpack(packed_string)[1:]
-    assert token == encode_token(strings, secret_key_f)
+    assert token == encode_token(strings)
     return dict(zip(keys, strings))
 
 def secret_key_f(user_id, *args):
@@ -69,7 +69,7 @@ def secret_key_f(user_id, *args):
 
 def generate_login_token(user, url):
     strings = [str(user.id), url.strip(), str(int(time.time()))]
-    token_byte_string = encode_token(strings, secret_key_f)
+    token_byte_string = encode_token(strings)
     
     if URLCRYPT_USE_RSA_ENCRYPTION:
         token_byte_string = urlcrypt.rsa.encrypt(token_byte_string)
@@ -83,7 +83,7 @@ def decode_login_token(token):
         token_byte_string = urlcrypt.rsa.decrypt(token_byte_string)
         
     keys = ('user_id', 'url', 'timestamp')
-    data = decode_token(token_byte_string, keys, secret_key_f)
+    data = decode_token(token_byte_string, keys)
     data['user_id'] = int(data['user_id'])
     data['timestamp'] = int(data['timestamp'])
     return data

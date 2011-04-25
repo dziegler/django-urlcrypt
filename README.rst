@@ -57,7 +57,7 @@ Advanced lib usage::
         'user_id': '12345'
     }
     
-    token = urlcrypt.encode_token(message['user_id'], message['url'])
+    token = urlcrypt.encode_token((message['user_id'], message['url']))
     decoded_message = urlcrypt.decode_token(token, ('user_id', 'url', 'timestamp'))
     
     >>> print token
