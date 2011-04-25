@@ -1,6 +1,7 @@
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 
-class UrlCryptBackend:
+class UrlCryptBackend(ModelBackend):
     
     def authenticate(self, decoded_data=None):
         try:
@@ -13,3 +14,4 @@ class UrlCryptBackend:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
+    
