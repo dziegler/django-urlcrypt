@@ -16,9 +16,15 @@ class EncodedURLNode(URLNode):
     
     def render(self, context):
         url = super(EncodedURLNode, self).render(context)
+        if self.asvar:
+            url = context[self.asvar]
         user = self.user.resolve(context)
         token = generate_login_token(user, url)
-        return reverse('urlcrypt_redirect', args=(token,))
+        crypt_url = reverse('urlcrypt_redirect', args=(token,))
+        if self.asvar:
+            context[self.asvar] = crypt_url
+            return ''
+        return crypt_url
 
 @register.tag
 def encoded_url(parser, token):
